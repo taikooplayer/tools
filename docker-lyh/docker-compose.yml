@@ -1,0 +1,60 @@
+version: '3'
+services:
+#    nginx:
+#        volumes:
+#            - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+#            - ./nginx/conf/php-fpm.conf:/etc/nginx/php-fpm.conf
+#            - ./nginx/conf/fastcgi.conf:/etc/nginx/fastcgi.conf
+#            - ./nginx/conf/proxy.conf:/etc/nginx/proxy.conf
+#            - ./nginx/conf/vhost:/etc/nginx/vhost
+#            - ./nginx/conf/rewrite:/etc/nginx/rewrite
+#            - /data/logs/nginx:/data/logs/nginx
+#            #定义项目目录
+#            - ./www:/data/www
+#            - /etc/localtime:/etc/localtime
+#        restart: always
+#        build: ./nginx
+#        depends_on:
+#            - elasticsearch-head
+#        networks:
+#            - frontend
+#        ports:
+#            - "80:80"
+#            - "443:443"
+#        #容器名称
+#        container_name: nginx
+    elasticsearch:
+        build: ./es
+        container_name: elasticsearch
+        volumes:
+            - /data/docker/elasticsearch/data:/usr/share/elasticsearch/data
+            - /data/docker/elasticsearch/logs:/usr/share/elasticsearch/logs
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        ports:
+            - "9200:9200"
+#            - "9300:9300"
+        restart: always
+        environment:
+            - bootstrap.memory_lock=true
+            # - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+        networks:
+            frontend:
+                aliases:
+                    - elasticsearch
+    elasticsearch-head:
+        build: ./es/head
+        ports:
+            - "9100:9100"
+        depends_on:
+            - elasticsearch
+        networks:
+            frontend:
+                aliases:
+                    - elasticsearch-head
+        restart: always
+        container_name: elasticsearch-head
+networks:
+    frontend:
